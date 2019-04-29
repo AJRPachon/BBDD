@@ -136,14 +136,26 @@ SELECT * FROM Orders
 
 --Coger total de ventas de cada año  --FLOOR Para coger decimales de un resultado. Según opr el múltiplo de 10 que se * o / dará más decimales o menos 
 
-SELECT DISTINCT YEAR(O.OrderDate) AS Año, FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 96]  FROM Orders AS O
-	INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
-GROUP BY OrderDate
-HAVING YEAR(OrderDate) = 1996
+USE Northwind
 
-
-SELECT DISTINCT YEAR(O.OrderDate) AS Año, FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 97]  FROM Orders AS O
+GO
+CREATE VIEW [Ventas totales 1996] AS 
+SELECT OD.ProductID, FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 96], YEAR(O.OrderDate) AS Año FROM Orders AS O
 	INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
-GROUP BY OrderDate
+GROUP BY OD.ProductID, YEAR(O.OrderDate)
+HAVING YEAR(O.OrderDate) = 1996
+GO
+
+GO
+CREATE VIEW [Ventas totales 1997] AS
+SELECT OD.ProductID , FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 97], YEAR(O.OrderDate) AS Año FROM Orders AS O
+	INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
+GROUP BY OD.ProductID, YEAR(O.OrderDate)
 HAVING YEAR(OrderDate) = 1997
+GO
+
+SELECT VT96.[Ventas del 96] - VT97.[Ventas del 97] FROM [Ventas totales 1996] AS VT96
+	INNER JOIN [Ventas totales 1997] AS VT97 ON VT96.ProductID = VT97.ProductID
+
+
 
