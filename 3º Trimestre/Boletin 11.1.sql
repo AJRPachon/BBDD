@@ -130,15 +130,20 @@ SELECT * FROM EmployeeSales
 --Entre 10% y 50%                   +5%
 --Mayor del 50%            10% con un máximo de 2,25
 
-SELECT DISTINCT YEAR(O.OrderDate) AS Año FROM Orders AS O
+SELECT * FROM Products
+SELECT * FROM [Order Details]
+SELECT * FROM Orders
+
+--Coger total de ventas de cada año  --FLOOR Para coger decimales de un resultado. Según opr el múltiplo de 10 que se * o / dará más decimales o menos 
+
+SELECT DISTINCT YEAR(O.OrderDate) AS Año, FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 96]  FROM Orders AS O
 	INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
 GROUP BY OrderDate
 HAVING YEAR(OrderDate) = 1996
 
 
-SELECT DISTINCT YEAR(O.OrderDate) AS Año FROM Orders AS O
+SELECT DISTINCT YEAR(O.OrderDate) AS Año, FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) * 100) /100 AS [Ventas del 97]  FROM Orders AS O
 	INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
 GROUP BY OrderDate
 HAVING YEAR(OrderDate) = 1997
-
 
