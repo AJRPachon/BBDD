@@ -153,9 +153,31 @@ SELECT OD.ProductID , FLOOR(SUM(OD.Quantity  * (OD.UnitPrice*(1-OD.Discount))) *
 GROUP BY OD.ProductID, YEAR(O.OrderDate)
 HAVING YEAR(OrderDate) = 1997
 GO
-
-SELECT VT96.[Ventas del 96] - VT97.[Ventas del 97] FROM [Ventas totales 1996] AS VT96
+ 
+GO
+CREATE VIEW [DifVentas] AS
+SELECT VT97.ProductID AS IDProducto, FLOOR((((VT97.[Ventas del 97] / VT96.[Ventas del 96])-1)*100)*100)/100 AS Incremento FROM [Ventas totales 1996] AS VT96
 	INNER JOIN [Ventas totales 1997] AS VT97 ON VT96.ProductID = VT97.ProductID
+GO
 
+BEGIN TRANSACTION
+UPDATE Products 
+	
+SET UnitPrice = CASE
 
+	WHEN DifVentas.Incremento < 0 THEN (UnitPrice - UnitPrice * 0.01)
+	WHEN DifVentas.Incremento BETWEEN 0 AND 10 THEN UnitPrice
+	WHEN DifVentas.Incremento BETWEEN 10 AND 50 THEN (UnitPrice + UnitPrice * 0.05)
+	WHEN DifVentas.Incremento > 50 THEN 
+		CASE WHEN UnitPrice * 0.1 > 2.25 THEN (UnitPrice + 2.25) 
+			ELSE UnitPrice * 1.1
+		END
+END
 
+FROM DifVentas
+
+WHERE ProductID = DifVentas.IDProducto
+
+--ROLLBACK
+--COMMIT
+SELECT * FROM Products
