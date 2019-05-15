@@ -134,7 +134,7 @@ SELECT * FROM Products
 SELECT * FROM [Order Details]
 SELECT * FROM Orders
 
---Coger total de ventas de cada año  --FLOOR Para coger decimales de un resultado. Según opr el múltiplo de 10 que se * o / dará más decimales o menos 
+--Coger total de ventas de cada año  --FLOOR Para coger decimales de un resultado. Según por el múltiplo de 10 que se * o / dará más decimales o menos 
 
 USE Northwind
 
