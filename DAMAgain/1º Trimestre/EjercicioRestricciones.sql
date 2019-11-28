@@ -55,9 +55,13 @@ CREATE TABLE DatosRelacionados(
 	NombreRelacionado CHAR(15) NOT NULL,
 	ID_DatoRestrictivo SMALLINT NOT NULL,
 	PalabraTabu VARCHAR(20) NULL,
+	NumRarito TINYINT NULL,
+	NumMasGrande SMALLINT NOT NULL,
 
-	CONSTRAINT FK_DatosRelacionados_DaRestric FOREIGN KEY (ID_DatoRestrictivo) REFERENCES DatosRestrictivos (ID) ON DELETE NO ACTION ON UPDATE CASCADE,
-	CONSTRAINT CK_PalabraTabu_DatosRelacionados CHECK ((PalabraTabu != 'MENA''Gurtel''ERE''Procés''sobresueldo') AND (PalabraTabu != '%eo'))
+	CONSTRAINT FK_DatosRestrictivos_DaRelac FOREIGN KEY (ID_DatoRestrictivo) REFERENCES DatosRestrictivos (ID) ON DELETE NO ACTION ON UPDATE CASCADE,
+	CONSTRAINT CK_PalabraTabu_DatosRelacionados CHECK ((PalabraTabu != 'MENA''Gurtel''ERE''Procés''sobresueldo') AND (PalabraTabu != '%eo')),
+	CONSTRAINT CK_NumRar_DatosRelacionados CHECK (NumRarito < 20) --¿Numero Primo?
+
 
 	
 )
