@@ -22,7 +22,7 @@ CREATE TABLE DatosRestrictivos(
 
 	CONSTRAINT PK_DatosRestictivos PRIMARY KEY (ID),
 	CONSTRAINT UQ_Nomb_DatosRestrictivos UNIQUE (Nombre),
-	CONSTRAINT CK_Nomb_DatosRestrictivos CHECK (Nombre LIKE 'N%' OR Nombre LIKE 'X%'),
+	CONSTRAINT CK_Nomb_DatosRestrictivos CHECK (Nombre NOT LIKE 'N%''X%'),  --'[NX]%'
 	CONSTRAINT CK_NumP_DatosRestrictivos CHECK (Numpelos BETWEEN 0 AND 150000),
 	CONSTRAINT CK_TipoRo_DatosRestrictivos CHECK (TipoRopa LIKE 'C''F''E''P''B''N'),
 	CONSTRAINT CK_NumSuer_DatosRestrictivos CHECK ((NumSuerte BETWEEN 10 AND 40) AND (NumSuerte %3 = 0)),
@@ -58,12 +58,12 @@ CREATE TABLE DatosRelacionados(
 	NumRarito TINYINT NULL,
 	NumMasGrande SMALLINT NOT NULL,
 
+	CONSTRAINT PK_DatosRestrictivos PRIMARY KEY (NumMasGrande),
 	CONSTRAINT FK_DatosRestrictivos_DaRelac FOREIGN KEY (ID_DatoRestrictivo) REFERENCES DatosRestrictivos (ID) ON DELETE NO ACTION ON UPDATE CASCADE,
 	CONSTRAINT CK_PalabraTabu_DatosRelacionados CHECK ((PalabraTabu != 'MENA''Gurtel''ERE''Procés''sobresueldo') AND (PalabraTabu != '%eo')),
-	CONSTRAINT CK_NumRar_DatosRelacionados CHECK (NumRarito < 20) --¿Numero Primo?
+	CONSTRAINT CK_NumRar_DatosRelacionados CHECK (NumRarito < 20 AND NumRarito NOT IN (2,3,5,7,11,13,17,19)),
+	CONSTRAINT CK_NumMasGran_DatosRelacionados CHECK ( NumMasGrande BETWEEN NumRarito AND 1000)
 
-
-	
 )
 GO
 
