@@ -42,11 +42,22 @@ GO
 
 	SELECT ProductID, UnitPrice, SUM(UnitPrice*Quantity) AS [Total facturado] FROM [Order Details]
 	GROUP BY ProductID, UnitPrice
+	ORDER BY [Total facturado] DESC
+
 
 --6. ID del proveedor e importe total del stock acumulado de productos correspondientes a ese proveedor.
 
+	SELECT * FROM Products
+	
+	SELECT SupplierID, SUM(UnitPrice*UnitsInStock) AS [Importe total del stock] FROM Products
+	GROUP BY SupplierID
+
 
 --7. Número de pedidos registrados mes a mes de cada año.
+
+	SELECT * FROM Orders
+
+	SELECT  FROM Orders
 
 
 --8. Año y tiempo medio transcurrido entre la fecha de cada pedido (OrderDate) y la fecha en la que lo hemos enviado (ShipDate), en días para cada año.
