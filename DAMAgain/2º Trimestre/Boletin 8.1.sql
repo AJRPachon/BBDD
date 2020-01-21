@@ -81,10 +81,18 @@ GO
 
 --9. ID del distribuidor y número de pedidos enviados a través de ese distribuidor.
 
-	SELECT * FROM Suppliers
+	SELECT * FROM Products
 
-	SELECT * FROM Suppliers
+	SELECT SupplierID, SUM(UnitsOnOrder) [Numero pedidos enviados] FROM Products
+	GROUP BY SupplierID
 
+	SELECT * FROM Orders
 
 
 --10. ID de cada proveedor y número de productos distintos que nos suministra.
+
+	SELECT * FROM Products
+
+	SELECT SupplierID FROM Products
+
+
