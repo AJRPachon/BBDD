@@ -55,25 +55,106 @@
 	SELECT * FROM Orders
 	SELECT * FROM Customers
 
-	SELECT E.EmployeeID, E.FirstName, E.LastName, E.HomePhone FROM Employees AS E
+	SELECT DISTINCT E.EmployeeID, E.FirstName, E.LastName, E.HomePhone FROM Employees AS E
 		INNER JOIN Orders AS O ON E.EmployeeID = O.EmployeeID
 		INNER JOIN Customers AS C ON O.CustomerID = C.CustomerID
 	WHERE C.CompanyName IN ('Bon app''','Meter Franken')
-
+	ORDER BY E.EmployeeID
 
 --Empleados (ID, nombre, apellidos, mes y día de su cumpleaños) que no han vendido nunca nada a ningún cliente de Francia. *
 
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM Customers
+
+	--Para usar EXCEPT los dos SELECT tienen que tener la misma estructura.
+
+	SELECT E.EmployeeID, E.FirstName, E.LastName, DATEPART(MONTH, E.BirthDate) AS [Mes cumpleaños], DATEPART(DAY, E.BirthDate) AS [Dia de cumpleaños]  FROM Employees AS E
+	EXCEPT
+
+	SELECT E.EmployeeID, E.FirstName, E.LastName, DATEPART(MONTH, E.BirthDate) AS [Mes cumpleaños], DATEPART(DAY, E.BirthDate) AS [Dia de cumpleaños] FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	WHERE C.Country = 'France'
+	
 
 --Total de ventas en US$ de productos de cada categoría (nombre de la categoría).
+
+	SELECT * FROM Products
+	SELECT * FROM Categories
+	SELECT * FROM [Order Details]
+
+	SELECT C.CategoryName, SUM((OD.UnitPrice*OD.Quantity)*(1-OD.Discount)) AS [Total de ventas] FROM Products AS P
+		INNER JOIN Categories AS C ON P.CategoryID = C.CategoryID
+		INNER JOIN [Order Details] AS OD ON P.ProductID = OD.ProductID
+	GROUP BY C.CategoryName
 
 
 --Total de ventas en US$ de cada empleado cada año (nombre, apellidos, dirección).
 
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details] 
+
+	SELECT E.FirstName, E.LastName, E.[Address], YEAR(O.OrderDate) AS Año, SUM((OD.UnitPrice*OD.Quantity)*(1-OD.Discount)) AS [Total de ventas]  
+	FROM Employees AS E
+		INNER JOIN Orders AS O ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD ON O.OrderID = OD.OrderID
+	GROUP BY E.FirstName, E.LastName, E.Address, YEAR(O.OrderDate)
+	ORDER BY E.FirstName, E.LastName, YEAR(O.OrderDate)
+
 
 --Ventas de cada producto en el año 97. Nombre del producto y unidades.
 
+	SELECT * FROM Products
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+
+	SELECT P.ProductID, P.ProductName, SUM(OD.Quantity) AS [Unidades vendidas] FROM Products AS P
+		INNER JOIN [Order Details] AS OD ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O ON OD.OrderID = O.OrderID
+	WHERE YEAR(O.OrderDate) = '1997'
+	GROUP BY P.ProductID, P.ProductName, YEAR(O.OrderDate)
+	ORDER BY P.ProductID
+
 
 --Cuál es el producto del que hemos vendido más unidades en cada país. *
+
+	SELECT P.ProductID, P.ProductName, SUM(OD.Quantity) AS [Unidades vendidas] FROM Products AS P
+		INNER JOIN [Order Details] AS OD ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O ON OD.OrderID = O.OrderID
+	GROUP BY P.ProductID, P.ProductName
+	ORDER BY P.ProductID
+ 
+		-- Agregar a todo lo anterior el nombre del producto
+
+	SELECT ProductName, SUM(OD.Quantity) AS CantidadMaxima, O.ShipCountry FROM Products AS P 
+
+			INNER JOIN [Order Details] AS OD	ON P.ProductID = OD.ProductID
+			INNER JOIN Orders AS O	ON O.OrderID = OD.OrderID
+			INNER JOIN Customers AS C	ON C.CustomerID = O.CustomerID
+			INNER JOIN --Coger el mayor de cada pais
+
+				(SELECT MAX(MasUniProPais) AS Superventas, ShipCountry
+
+				FROM(--Cantidad total de cada producto por pais
+
+						SELECT ProductID, O.ShipCountry, SUM(OD.Quantity) AS [MasUniProPais] FROM  [Order Details] AS OD
+							INNER JOIN Orders AS O 	ON O.OrderID = OD.OrderID
+						GROUP BY ProductID,  O.ShipCountry
+
+					) AS MasUnidadesVendidasPais 
+
+					GROUP BY ShipCountry
+
+			)AS MayorPorPais ON O.ShipCountry = MayorPorPais.ShipCountry
+
+	GROUP BY ProductName, O.ShipCountry, Superventas
+
+	HAVING SUM(OD.Quantity) = Superventas
+
+	ORDER BY O.ShipCountry
+
 
 
 --Empleados (nombre y apellidos) que trabajan a las órdenes de Andrew Fuller.
