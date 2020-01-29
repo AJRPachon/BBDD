@@ -70,6 +70,7 @@
 	--Para usar EXCEPT los dos SELECT tienen que tener la misma estructura.
 
 	SELECT E.EmployeeID, E.FirstName, E.LastName, DATEPART(MONTH, E.BirthDate) AS [Mes cumpleaños], DATEPART(DAY, E.BirthDate) AS [Dia de cumpleaños]  FROM Employees AS E
+	
 	EXCEPT
 
 	SELECT E.EmployeeID, E.FirstName, E.LastName, DATEPART(MONTH, E.BirthDate) AS [Mes cumpleaños], DATEPART(DAY, E.BirthDate) AS [Dia de cumpleaños] FROM Employees AS E
@@ -120,14 +121,6 @@
 
 --Cuál es el producto del que hemos vendido más unidades en cada país. *
 
-	SELECT P.ProductID, P.ProductName, SUM(OD.Quantity) AS [Unidades vendidas] FROM Products AS P
-		INNER JOIN [Order Details] AS OD ON P.ProductID = OD.ProductID
-		INNER JOIN Orders AS O ON OD.OrderID = O.OrderID
-	GROUP BY P.ProductID, P.ProductName
-	ORDER BY P.ProductID
- 
-		-- Agregar a todo lo anterior el nombre del producto
-
 	SELECT ProductName, SUM(OD.Quantity) AS CantidadMaxima, O.ShipCountry FROM Products AS P 
 
 			INNER JOIN [Order Details] AS OD	ON P.ProductID = OD.ProductID
@@ -159,5 +152,14 @@
 
 --Empleados (nombre y apellidos) que trabajan a las órdenes de Andrew Fuller.
 
-
+	SELECT E.FirstName, E.LastName FROM Employees AS E
+		INNER JOIN Employees AS Jefe ON E.ReportsTo = Jefe.EmployeeID
+	WHERE Jefe.FirstName = 'Andrew' AND Jefe.LastName = 'Fuller'
+		
 --Número de subordinados que tiene cada empleado, incluyendo los que no tienen ninguno. Nombre, apellidos, ID.
+
+	SELECT E.EmployeeID, E.FirstName, E.LastName FROM Employees AS E
+		INNER JOIN Employees AS Minion
+
+
+
