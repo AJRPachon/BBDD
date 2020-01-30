@@ -1,17 +1,57 @@
+
+USE Northwind
+GO
+
 --1. Número de clientes de cada país. 
+
+	SELECT * FROM Customers	
+	
+	SELECT Country, COUNT(CustomerID) AS [Numero de clientes] FROM Customers	
+	GROUP BY Country
 
 
 --2. Número de clientes diferentes que compran cada producto. Incluye el nombre 
 --del producto 
 
+	SELECT * FROM Customers
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+	SELECT * FROM Products
+
+	SELECT P.ProductName, COUNT(DISTINCT C.CustomerID) AS [Numero de clientes diferentes] FROM Customers AS C
+		INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		INNER JOIN Products AS P  ON OD.ProductID = P.ProductID
+	GROUP BY P.ProductID, P.ProductName
+	ORDER BY P.ProductName
+
 
 --3. Número de países diferentes en los que se vende cada producto. Incluye el 
 --nombre del producto 
-
-
+	
+	SELECT * FROM Products
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+	
+	SELECT P.ProductName, COUNT(DISTINCT O.ShipCountry) AS [Numero de paises] FROM Products AS P
+		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	GROUP BY P.ProductName
+	ORDER BY P.ProductName
+		 
 --4. Empleados (nombre y apellido) que han vendido alguna vez 
 --“Gudbrandsdalsost”, “Lakkalikööri”, “Tourtière” o “Boston Crab Meat”. 
 
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+	SELECT * FROM Products
+
+	SELECT DISTINCT E.FirstName, E.LastName FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		INNER JOIN Products AS P  ON OD.ProductID = P.ProductID
+	WHERE P.ProductName IN ('Gudbrandsdalsost', 'Lakkalikööri', 'Tourtière', 'Boston Crab Meat')
 
 --5. Empleados que no han vendido nunca “Northwoods Cranberry Sauce” o 
 --“Carnarvon Tigers”. 

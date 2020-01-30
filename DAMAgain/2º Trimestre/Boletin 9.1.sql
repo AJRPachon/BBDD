@@ -1,4 +1,6 @@
 
+USE Northwind
+GO
 
 --Nombre de los proveedores y número de productos que nos vende cada uno
 
@@ -158,8 +160,11 @@
 		
 --Número de subordinados que tiene cada empleado, incluyendo los que no tienen ninguno. Nombre, apellidos, ID.
 
-	SELECT E.EmployeeID, E.FirstName, E.LastName FROM Employees AS E
-		INNER JOIN Employees AS Minion
+	SELECT * FROM Employees
+
+	SELECT E.EmployeeID, E.FirstName, E.LastName, COUNT(E.EmployeeID) AS [Numero Subordinados] FROM Employees AS E
+		INNER JOIN Employees AS Minion ON E.EmployeeID = Minion.ReportsTo
+	GROUP BY E.EmployeeID, E.EmployeeID, E.FirstName, E.LastName
 
 
 
