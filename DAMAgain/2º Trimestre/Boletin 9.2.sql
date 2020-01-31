@@ -56,23 +56,86 @@ GO
 --5. Empleados que no han vendido nunca “Northwoods Cranberry Sauce” o 
 --“Carnarvon Tigers”. 
 
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+	SELECT * FROM Products
+
+	SELECT FirstName, LastName FROM Employees
+
+	EXCEPT
+
+	SELECT DISTINCT E.FirstName, E.LastName FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		INNER JOIN Products AS P  ON OD.ProductID = P.ProductID
+	WHERE P.ProductName IN ( 'Northwoods Cranberry Sauce','Carnarvon Tigers' )
+
 
 --6. Número de unidades de cada categoría de producto que ha vendido cada 
 --empleado. Incluye el nombre y apellidos del empleado y el nombre de la 
 --categoría. 
 
+	SELECT * FROM Categories
+	SELECT * FROM Products
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+	SELECT * FROM Employees
+
+	SELECT DISTINCT E.FirstName, E.LastName, C.CategoryName, SUM(OD.Quantity) AS [Numero unidades] FROM Categories AS C
+		INNER JOIN Products AS P  ON C.CategoryID = P.CategoryID
+		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
+	GROUP BY E.FirstName, E.LastName, C.CategoryName
+	ORDER BY E.FirstName, E.LastName, c.CategoryName
+	
 
 --7. Total de ventas (US$) de cada categoría en el año 97. Incluye el nombre de la 
 --categoría. 
+
+	SELECT * FROM [Order Details]
+	SELECT * FROM Products
+	SELECT * FROM Categories
+	
+	SELECT SUM(OD.Quantity*OD.UnitPrice*(1-OD.Discount)) AS [Total ventas], C.CategoryName FROM [Order Details] AS OD
+		
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN Products AS P  ON OD.ProductID = P.ProductID
+		INNER JOIN Categories AS C  ON P.CategoryID = C.CategoryID
+	
+	WHERE YEAR(O.OrderDate) = '1997'
+	GROUP BY C.CategoryName
+	ORDER BY C.CategoryName
+
 
 
 --8. Productos que han comprado más de un cliente del mismo país, indicando el 
 --nombre del producto, el país y el número de clientes distintos de ese país que 
 --lo han comprado. 
 
+	SELECT * FROM Products
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+	SELECT * FROM Customers
+
+	SELECT DISTINCT P.ProductName, C.Country, COUNT(O.CustomerID) AS [Numero de clientes] FROM Products AS P
+
+		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	
+	GROUP BY P.ProductName, C.Country
+	HAVING COUNT(O.CustomerID) > 1
+	ORDER BY P.ProductName, C.Country
+	
 
 --9. Total de ventas (US$) en cada país cada año. 
 
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+
+	SELECT SUM(OD.UnitPrice * OD.Quantity * (1 - OD.Discount)) AS [Total de ventas] FROM [Order Details] AS OD
 
 --10. Producto superventas de cada año, indicando año, nombre del producto, 
 --categoría y cifra total de ventas. 
