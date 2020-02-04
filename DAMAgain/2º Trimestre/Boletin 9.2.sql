@@ -176,6 +176,27 @@ GO
 --11. Cifra de ventas de cada producto en el año 97 y su aumento o disminución 
 --respecto al año anterior en US $ y en %. 
 
+	SELECT * FROM Products
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+
+	SELECT P.ProductID, P.ProductName, ROUND(SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)),2) AS [Total de ventas], ROUND(AnioAnterior.[Total de ventas anio anterior],2) AS [Ventas anio anterior], ROUND(SUM((OD.UnitPrice*OD.Quantity * (1-OD.Discount))) - AnioAnterior.[Total de ventas anio anterior], 2) AS Diferencia, ROUND(((SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)) -  AnioAnterior.[Total de ventas anio anterior])/ AnioAnterior.[Total de ventas anio anterior])*100, 2) AS [Tanto por ciento] FROM Products AS P
+		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN(
+
+			SELECT P.ProductID, P.ProductName, SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)) AS [Total de ventas anio anterior] FROM Products AS P
+				INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+				INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+			GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID
+			HAVING YEAR(O.OrderDate) = '1996'
+		
+		) AS AnioAnterior ON P.ProductID = AnioAnterior.ProductID
+
+	GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID, AnioAnterior.[Total de ventas anio anterior]
+	HAVING YEAR(O.OrderDate) = '1997'
+	ORDER BY P.ProductID
+
 
 --12. Mejor cliente (el que más nos compra) de cada país. 
 
