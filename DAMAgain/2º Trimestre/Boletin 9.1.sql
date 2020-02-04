@@ -162,9 +162,8 @@ GO
 
 	SELECT * FROM Employees
 
-	SELECT E.EmployeeID, E.FirstName, E.LastName, COUNT(E.EmployeeID) AS [Numero Subordinados] FROM Employees AS E
-		INNER JOIN Employees AS Minion ON E.EmployeeID = Minion.ReportsTo
-	GROUP BY E.EmployeeID, E.EmployeeID, E.FirstName, E.LastName
-
+	SELECT E.EmployeeID, E.FirstName, E.LastName, COUNT(Minion.EmployeeID) AS [Numero Subordinados] FROM Employees AS E
+		LEFT JOIN Employees AS Minion ON E.EmployeeID = Minion.ReportsTo
+	GROUP BY E.EmployeeID, E.FirstName, E.LastName
 
 
