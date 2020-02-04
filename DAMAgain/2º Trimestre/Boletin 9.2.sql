@@ -135,10 +135,42 @@ GO
 	SELECT * FROM Orders
 	SELECT * FROM [Order Details]
 
-	SELECT SUM(OD.UnitPrice * OD.Quantity * (1 - OD.Discount)) AS [Total de ventas] FROM [Order Details] AS OD
+	SELECT O.ShipCountry, YEAR(O.ShippedDate) AS Año, SUM(OD.UnitPrice * OD.Quantity * (1 - OD.Discount)) AS [Total de ventas] FROM [Order Details] AS OD
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	GROUP BY O.ShipCountry, YEAR(O.ShippedDate)
+	ORDER BY O.ShipCountry, YEAR(O.ShippedDate)
+
 
 --10. Producto superventas de cada año, indicando año, nombre del producto, 
 --categoría y cifra total de ventas. 
+
+	SELECT * FROM Products
+	SELECT * FROM Categories
+
+	SELECT * FROM [Order Details]
+	SELECT * FROM Orders
+
+	SELECT P.ProductName, C.CategoryName, COUNT(OD.ProductID) AS [Numero productos], ProductoSuperVentas.Año FROM Products AS P
+		INNER JOIN Categories AS C  ON P.CategoryID = C.CategoryID
+		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN
+		(
+			SELECT SumProductoXAnio.Año, MAX(SumProductoXAnio.[Numero productos]) AS [SuperVentas] 
+			FROM (
+					SELECT OD.ProductID , YEAR(O.OrderDate) AS [Año] ,COUNT(OD.ProductID) AS [Numero productos] FROM [Order Details] AS OD
+						INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+					GROUP BY OD.ProductID, YEAR(O.OrderDate)
+		
+				) AS SumProductoXAnio
+
+			GROUP BY SumProductoXAnio.Año 
+		 
+		) AS ProductoSuperVentas ON YEAR(O.OrderDate) = ProductoSuperVentas.Año
+
+	GROUP BY ProductoSuperVentas.Año, SuperVentas, P.ProductName, C.CategoryName
+	HAVING COUNT(OD.ProductID) = SuperVentas
+
 
 
 --11. Cifra de ventas de cada producto en el año 97 y su aumento o disminución 
