@@ -253,18 +253,19 @@ GO
 	SELECT * FROM Orders
 	SELECT * FROM [Order Details]
 
-	SELECT AVG(Media.Cantidad) AS [Media] 
-	FROM(
+	SELECT * FROM Employees AS E
+		INNER JOIN(
+			SELECT AVG(Media.Cantidad) AS [Media] 
+			FROM(
 
-		SELECT E.EmployeeID, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) AS [Cantidad] FROM [Order Details] AS OD
-			INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-			INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
-		GROUP BY E.EmployeeID, YEAR(O.OrderDate)
-		HAVING YEAR(O.OrderDate) = '1997'
+				SELECT E.EmployeeID, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) AS [Cantidad] FROM [Order Details] AS OD
+					INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+					INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
+				GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+				HAVING YEAR(O.OrderDate) = '1997'
 
-		)AS Media
-	GROUP BY Media.EmployeeID
-
+			)AS Media
+		)
 
 
 --16. Empleados que hayan aumentado su cifra de ventas más de un 10% entre dos 
