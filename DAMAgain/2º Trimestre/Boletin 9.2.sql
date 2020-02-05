@@ -98,7 +98,7 @@ GO
 	SELECT * FROM Products
 	SELECT * FROM Categories
 	
-	SELECT SUM(OD.Quantity*OD.UnitPrice*(1-OD.Discount)) AS [Total ventas], C.CategoryName FROM [Order Details] AS OD
+	SELECT ROUND(SUM(OD.Quantity*OD.UnitPrice*(1-OD.Discount)), 2) AS [Total ventas], C.CategoryName FROM [Order Details] AS OD
 		
 		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
 		INNER JOIN Products AS P  ON OD.ProductID = P.ProductID
@@ -135,7 +135,7 @@ GO
 	SELECT * FROM Orders
 	SELECT * FROM [Order Details]
 
-	SELECT O.ShipCountry, YEAR(O.ShippedDate) AS Año, SUM(OD.UnitPrice * OD.Quantity * (1 - OD.Discount)) AS [Total de ventas] FROM [Order Details] AS OD
+	SELECT O.ShipCountry, YEAR(O.ShippedDate) AS Año, ROUND(SUM(OD.UnitPrice * OD.Quantity * (1 - OD.Discount)), 2) AS [Total de ventas] FROM [Order Details] AS OD
 		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
 	GROUP BY O.ShipCountry, YEAR(O.ShippedDate)
 	ORDER BY O.ShipCountry, YEAR(O.ShippedDate)
@@ -200,16 +200,71 @@ GO
 
 --12. Mejor cliente (el que más nos compra) de cada país. 
 
+	SELECT * FROM Customers
+	SELECT * FROM Orders
+	
+	SELECT C.CustomerID, C.Country, COUNT(O.CustomerID) [TheBest] FROM Customers AS C	
+		INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
+		INNER JOIN(
+		
+			SELECT MaximoComprador.Country, MAX(MaximoComprador.[Veces que compra]) AS [Maximo comprador] 
+			FROM(
+
+				SELECT C.CustomerID, COUNT(O.CustomerID) AS [Veces que compra], C.Country FROM Customers AS C
+					INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
+				GROUP BY C.CustomerID, C.Country
+
+			)AS MaximoComprador
+
+			GROUP BY MaximoComprador.Country 
+
+	)AS MejorCliente ON C.Country = MejorCliente.Country
+
+	GROUP BY C.CustomerID, C.Country, MejorCliente.[Maximo comprador]
+	HAVING COUNT(O.CustomerID) = MejorCliente.[Maximo comprador]
+
 
 --13. Número de productos diferentes que nos compra cada cliente. Incluye el 
 --nombre y apellidos del cliente y su dirección completa. 
 
+	SELECT * FROM Customers
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+
+	SELECT O.CustomerID, C.ContactName, COUNT(DISTINCT OD.ProductID) [Productos diferentes],  C.[Address] FROM [Order Details] AS OD
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	GROUP BY O.CustomerID, C.ContactName, C.[Address]
+
 
 --14. Clientes que nos compran más de cinco productos diferentes. 
 
+	SELECT O.CustomerID, C.ContactName, COUNT(DISTINCT OD.ProductID) [Productos diferentes] FROM [Order Details] AS OD
+		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	GROUP BY O.CustomerID, C.ContactName
+	HAVING COUNT(DISTINCT OD.ProductID) > 5
+	
 
 --15. Vendedores (nombre y apellidos) que han vendido una mayor cantidad que la 
 --media en US $ en el año 97. 
+
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+
+	SELECT AVG(Media.Cantidad) AS [Media] 
+	FROM(
+
+		SELECT E.EmployeeID, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) AS [Cantidad] FROM [Order Details] AS OD
+			INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+			INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
+		GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+		HAVING YEAR(O.OrderDate) = '1997'
+
+		)AS Media
+	GROUP BY Media.EmployeeID
+
 
 
 --16. Empleados que hayan aumentado su cifra de ventas más de un 10% entre dos 
