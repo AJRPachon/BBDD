@@ -281,8 +281,63 @@ GO
 	SELECT * FROM Orders
 	SELECT * FROM [Order Details]
 	
-	SELECT * FROM Employees AS E
-		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+	SELECT Anio1.EmployeeID, Anio1.Año1, ROUND(Anio1.[Ventas anio1],2) AS [Ventas anio], ROUND(anio2.[Ventas anio2],2) AS [Ventas del anio anterior],
+	((100 * (Anio1.[Ventas anio1] - Anio2.[Ventas anio2])) / Anio1.[Ventas anio1]) AS [Diferencia(%)]
+	FROM 
+			(SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año1, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio1]  FROM Employees AS E
+				INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+				INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+			) AS Anio1
+
+		INNER JOIN Orders AS O  ON Anio1.EmployeeID = O.EmployeeID
 		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		INNER JOIN(
 
+			SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año2, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio2]  FROM Employees AS E
+				INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+				INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
 
+		) AS Anio2 ON anio1.EmployeeID = Anio2.EmployeeID AND anio1.Año1-1 = Anio2.Año2 ---1 para que coja el año anterior
+
+	WHERE ((100 * (Anio1.[Ventas anio1] - Anio2.[Ventas anio2])) / Anio1.[Ventas anio1]) > 10
+	GROUP BY anio1.EmployeeID, Anio1.[Ventas anio1], anio2.[Ventas anio2], Anio1.Año1 
+	ORDER BY anio1.EmployeeID
+
+	
+	 
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+GO	 
+CREATE VIEW [Ventas Empleado Año] AS
+
+    SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas] FROM Employees AS E
+
+		INNER JOIN Orders AS O ON O.EmployeeID = E.EmployeeID
+		INNER JOIN [Order Details] AS OD ON OD.OrderID = O.OrderID
+
+    GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+
+GO
+
+	SELECT VEA1.EmployeeID, VEA1.Año,  VEA2.Ventas AS [Ventas del año anterior], VEA1.Ventas [Ventas del año], (VEA1.Ventas - VEA2.Ventas) AS [Diferencia de ventas], 
+
+			(100 * (VEA1.Ventas - VEA2.Ventas) / VEA1.Ventas) AS [Aumento/Disminucion(%)]
+
+	FROM [Ventas Empleado Año] AS VEA1
+
+		INNER JOIN (-- Ventas de cada empleado en cada año
+
+			SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas]FROM Employees AS E
+
+				INNER JOIN Orders AS O ON O.EmployeeID = E.EmployeeID
+				INNER JOIN [Order Details] AS OD ON OD.OrderID = O.OrderID
+
+			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+
+		) AS VEA2 ON VEA1.EmployeeID = VEA2.EmployeeID AND VEA1.Año-1 = VEA2.Año --En la condicion del on se relaciona cada empleado con las ventas del año anterior
+
+	WHERE (100 * (VEA1.Ventas - VEA2.Ventas) / VEA1.Ventas) > 10  -- Se filtran los que tengan un aumento de más del 10%
+
+	ORDER BY EmployeeID
