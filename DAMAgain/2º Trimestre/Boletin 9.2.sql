@@ -189,12 +189,12 @@ GO
 				INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
 				INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
 			GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID
-			HAVING YEAR(O.OrderDate) = '1996'
+			HAVING YEAR(O.OrderDate) = 1996
 		
 		) AS AnioAnterior ON P.ProductID = AnioAnterior.ProductID
 
 	GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID, AnioAnterior.[Total de ventas anio anterior]
-	HAVING YEAR(O.OrderDate) = '1997'
+	HAVING YEAR(O.OrderDate) = 1997
 	ORDER BY P.ProductID
 
 
@@ -253,8 +253,15 @@ GO
 	SELECT * FROM Orders
 	SELECT * FROM [Order Details]
 
-	SELECT * FROM Employees AS E
-		INNER JOIN(
+	SELECT E.FirstName, E.LastName, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) [Media vendida] FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+
+	WHERE YEAR(O.OrderDate) = 1997
+	GROUP BY E.FirstName, E.LastName, YEAR(O.OrderDate)	
+
+	HAVING SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) > (
+
 			SELECT AVG(Media.Cantidad) AS [Media] 
 			FROM(
 
@@ -262,11 +269,20 @@ GO
 					INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
 					INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
 				GROUP BY E.EmployeeID, YEAR(O.OrderDate)
-				HAVING YEAR(O.OrderDate) = '1997'
+				HAVING YEAR(O.OrderDate) = 1997
 
-			)AS Media
-		)
+			)AS Media) 
 
-
+		
 --16. Empleados que hayan aumentado su cifra de ventas más de un 10% entre dos 
 --años consecutivos, indicando el año en que se produjo el aumento. 
+
+	SELECT * FROM Employees
+	SELECT * FROM Orders
+	SELECT * FROM [Order Details]
+	
+	SELECT * FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+
+
