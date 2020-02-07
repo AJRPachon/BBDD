@@ -290,8 +290,6 @@ GO
 			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
 			) AS Anio1
 
-		INNER JOIN Orders AS O  ON Anio1.EmployeeID = O.EmployeeID
-		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
 		INNER JOIN(
 
 			SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año2, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio2]  FROM Employees AS E
@@ -299,10 +297,9 @@ GO
 				INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
 			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
 
-		) AS Anio2 ON anio1.EmployeeID = Anio2.EmployeeID AND anio1.Año1-1 = Anio2.Año2 ---1 para que coja el año anterior
+		) AS Anio2 ON anio1.EmployeeID = Anio2.EmployeeID AND anio1.Año1+1 = Anio2.Año2 -- +1 para que coja el año anterior
 
 	WHERE ((100 * (Anio1.[Ventas anio1] - Anio2.[Ventas anio2])) / Anio1.[Ventas anio1]) > 10
-	GROUP BY anio1.EmployeeID, Anio1.[Ventas anio1], anio2.[Ventas anio2], Anio1.Año1 
 	ORDER BY anio1.EmployeeID
 
 	
