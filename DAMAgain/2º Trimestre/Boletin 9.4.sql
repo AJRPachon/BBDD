@@ -83,8 +83,8 @@ GO
 	SELECT * FROM BI_Mascotas_Enfermedades
 	SELECT * FROM BI_Mascotas
 
+
 	
-		
 
 --8.Duración media, en días, de cada enfermedad, desde que se detecta hasta que se cura. Incluye solo los casos en que el animal se haya curado. Se entiende que una mascota se ha curado si tiene fecha de curación y está viva o su fecha de fallecimiento es posterior a la fecha de curación.
 
