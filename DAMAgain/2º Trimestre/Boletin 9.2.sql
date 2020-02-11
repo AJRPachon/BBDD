@@ -151,22 +151,22 @@ GO
 	SELECT * FROM Orders
 
 	SELECT P.ProductName, C.CategoryName, COUNT(OD.ProductID) AS [Numero productos], ProductoSuperVentas.Año FROM Products AS P
-		INNER JOIN Categories AS C  ON P.CategoryID = C.CategoryID
-		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
-		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-		INNER JOIN
-		(
-			SELECT SumProductoXAnio.Año, MAX(SumProductoXAnio.[Numero productos]) AS [SuperVentas] 
-			FROM (
-					SELECT OD.ProductID , YEAR(O.OrderDate) AS [Año] ,COUNT(OD.ProductID) AS [Numero productos] FROM [Order Details] AS OD
-						INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-					GROUP BY OD.ProductID, YEAR(O.OrderDate)
-		
-				) AS SumProductoXAnio
+	INNER JOIN Categories AS C  ON P.CategoryID = C.CategoryID
+	INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+	INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	INNER JOIN(
 
-			GROUP BY SumProductoXAnio.Año 
+		SELECT SumProductoXAnio.Año, MAX(SumProductoXAnio.[Numero productos]) AS [SuperVentas] 
+		FROM (
+				SELECT OD.ProductID , YEAR(O.OrderDate) AS [Año] ,COUNT(OD.ProductID) AS [Numero productos] FROM [Order Details] AS OD
+				INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+				GROUP BY OD.ProductID, YEAR(O.OrderDate)
+		
+			) AS SumProductoXAnio
+
+		GROUP BY SumProductoXAnio.Año 
 		 
-		) AS ProductoSuperVentas ON YEAR(O.OrderDate) = ProductoSuperVentas.Año
+	) AS ProductoSuperVentas ON YEAR(O.OrderDate) = ProductoSuperVentas.Año
 
 	GROUP BY ProductoSuperVentas.Año, SuperVentas, P.ProductName, C.CategoryName
 	HAVING COUNT(OD.ProductID) = SuperVentas
@@ -181,17 +181,17 @@ GO
 	SELECT * FROM Orders
 
 	SELECT P.ProductID, P.ProductName, ROUND(SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)),2) AS [Total de ventas], ROUND(AnioAnterior.[Total de ventas anio anterior],2) AS [Ventas anio anterior], ROUND(SUM((OD.UnitPrice*OD.Quantity * (1-OD.Discount))) - AnioAnterior.[Total de ventas anio anterior], 2) AS Diferencia, ROUND(((SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)) -  AnioAnterior.[Total de ventas anio anterior])/ AnioAnterior.[Total de ventas anio anterior])*100, 2) AS [Tanto por ciento] FROM Products AS P
+	INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
+	INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	INNER JOIN(
+
+		SELECT P.ProductID, P.ProductName, SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)) AS [Total de ventas anio anterior] FROM Products AS P
 		INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
 		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-		INNER JOIN(
-
-			SELECT P.ProductID, P.ProductName, SUM(OD.UnitPrice*OD.Quantity * (1-OD.Discount)) AS [Total de ventas anio anterior] FROM Products AS P
-				INNER JOIN [Order Details] AS OD  ON P.ProductID = OD.ProductID
-				INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-			GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID
-			HAVING YEAR(O.OrderDate) = 1996
+		GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID
+		HAVING YEAR(O.OrderDate) = 1996
 		
-		) AS AnioAnterior ON P.ProductID = AnioAnterior.ProductID
+	) AS AnioAnterior ON P.ProductID = AnioAnterior.ProductID
 
 	GROUP BY P.ProductName, YEAR(O.OrderDate), P.ProductID, AnioAnterior.[Total de ventas anio anterior]
 	HAVING YEAR(O.OrderDate) = 1997
@@ -204,19 +204,19 @@ GO
 	SELECT * FROM Orders
 	
 	SELECT C.CustomerID, C.Country, COUNT(O.CustomerID) [TheBest] FROM Customers AS C	
-		INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
-		INNER JOIN(
+	INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
+	INNER JOIN(
 		
-			SELECT MaximoComprador.Country, MAX(MaximoComprador.[Veces que compra]) AS [Maximo comprador] 
-			FROM(
+		SELECT MaximoComprador.Country, MAX(MaximoComprador.[Veces que compra]) AS [Maximo comprador] 
+		FROM(
 
-				SELECT C.CustomerID, COUNT(O.CustomerID) AS [Veces que compra], C.Country FROM Customers AS C
-					INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
-				GROUP BY C.CustomerID, C.Country
+			SELECT C.CustomerID, COUNT(O.CustomerID) AS [Veces que compra], C.Country FROM Customers AS C
+			INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
+			GROUP BY C.CustomerID, C.Country
 
-			)AS MaximoComprador
+		)AS MaximoComprador
 
-			GROUP BY MaximoComprador.Country 
+		GROUP BY MaximoComprador.Country 
 
 	)AS MejorCliente ON C.Country = MejorCliente.Country
 
@@ -232,16 +232,16 @@ GO
 	SELECT * FROM [Order Details]
 
 	SELECT O.CustomerID, C.ContactName, COUNT(DISTINCT OD.ProductID) [Productos diferentes],  C.[Address] FROM [Order Details] AS OD
-		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
 	GROUP BY O.CustomerID, C.ContactName, C.[Address]
 
 
 --14. Clientes que nos compran más de cinco productos diferentes. 
 
 	SELECT O.CustomerID, C.ContactName, COUNT(DISTINCT OD.ProductID) [Productos diferentes] FROM [Order Details] AS OD
-		INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-		INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
+	INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+	INNER JOIN Customers AS C  ON O.CustomerID = C.CustomerID
 	GROUP BY O.CustomerID, C.ContactName
 	HAVING COUNT(DISTINCT OD.ProductID) > 5
 	
@@ -254,24 +254,24 @@ GO
 	SELECT * FROM [Order Details]
 
 	SELECT E.FirstName, E.LastName, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) [Media vendida] FROM Employees AS E
-		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
-		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+	INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+	INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
 
 	WHERE YEAR(O.OrderDate) = 1997
 	GROUP BY E.FirstName, E.LastName, YEAR(O.OrderDate)	
 
 	HAVING SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) > (
 
-			SELECT AVG(Media.Cantidad) AS [Media] 
-			FROM(
+		SELECT AVG(Media.Cantidad) AS [Media] 
+		FROM(
 
-				SELECT E.EmployeeID, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) AS [Cantidad] FROM [Order Details] AS OD
-					INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
-					INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
-				GROUP BY E.EmployeeID, YEAR(O.OrderDate)
-				HAVING YEAR(O.OrderDate) = 1997
+			SELECT E.EmployeeID, SUM(OD.UnitPrice*OD.Quantity*(1-OD.Discount)) AS [Cantidad] FROM [Order Details] AS OD
+			INNER JOIN Orders AS O  ON OD.OrderID = O.OrderID
+			INNER JOIN Employees AS E  ON O.EmployeeID = E.EmployeeID
+			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+			HAVING YEAR(O.OrderDate) = 1997
 
-			)AS Media) 
+		)AS Media) 
 
 		
 --16. Empleados que hayan aumentado su cifra de ventas más de un 10% entre dos 
@@ -283,21 +283,21 @@ GO
 	
 	SELECT Anio1.EmployeeID, Anio1.Año1, ROUND(Anio1.[Ventas anio1],2) AS [Ventas anio], ROUND(anio2.[Ventas anio2],2) AS [Ventas del anio anterior],
 	((100 * (Anio1.[Ventas anio1] - Anio2.[Ventas anio2])) / Anio1.[Ventas anio1]) AS [Diferencia(%)]
-	FROM 
-			(SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año1, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio1]  FROM Employees AS E
-				INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
-				INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
-			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
-			) AS Anio1
+	FROM (
+		SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año1, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio1]  FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+		) AS Anio1
 
-		INNER JOIN(
+	INNER JOIN(
 
-			SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año2, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio2]  FROM Employees AS E
-				INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
-				INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
-			GROUP BY E.EmployeeID, YEAR(O.OrderDate)
+		SELECT E.EmployeeID, YEAR(O.OrderDate) AS Año2, SUM(OD.UnitPrice * OD.Quantity * (1-OD.Discount)) AS [Ventas anio2]  FROM Employees AS E
+		INNER JOIN Orders AS O  ON E.EmployeeID = O.EmployeeID
+		INNER JOIN [Order Details] AS OD  ON O.OrderID = OD.OrderID
+		GROUP BY E.EmployeeID, YEAR(O.OrderDate)
 
-		) AS Anio2 ON anio1.EmployeeID = Anio2.EmployeeID AND anio1.Año1+1 = Anio2.Año2 -- +1 para que coja el año anterior
+	) AS Anio2 ON anio1.EmployeeID = Anio2.EmployeeID AND anio1.Año1+1 = Anio2.Año2 -- +1 para que coja el año anterior
 
 	WHERE ((100 * (Anio1.[Ventas anio1] - Anio2.[Ventas anio2])) / Anio1.[Ventas anio1]) > 10
 	ORDER BY anio1.EmployeeID
