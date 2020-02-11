@@ -149,9 +149,26 @@ GO
 	INNER JOIN BI_Visitas AS V  ON M.Codigo = V.Mascota
 	GROUP BY M.Alias
 
---11.Incremento (o disminución) de peso que ha experimentado cada mascota entre cada dos consultas sucesivas. Incluye nombre de la mascota, especie, fecha de las dos consultas sucesivas e incremento o disminución de peso.
+--11.Incremento (o disminución) de peso que ha experimentado cada mascota entre cada dos consultas sucesivas. 
+--Incluye nombre de la mascota, especie, fecha de las dos consultas sucesivas e incremento o disminución de peso.
 
+	SELECT * FROM BI_Mascotas
+	SELECT * FROM BI_Visitas
 
+	SELECT DISTINCT M.Alias, M.Especie, (FechaIni.Peso - MAX(V.Peso)) AS [Diferencia de peso]
+	FROM( 
+		SELECT DISTINCT M.Codigo, M.Alias, V.Peso, MIN(V.Fecha) AS [PrimeraConsulta] FROM BI_Mascotas AS M
+		INNER JOIN BI_Visitas AS V  ON M.Codigo = V.Mascota
+		GROUP BY  M.Codigo, M.Alias, V.Peso
+	) AS FechaIni
+
+	INNER JOIN BI_Mascotas AS M  ON FechaIni.Codigo = M.Codigo
+	INNER JOIN BI_Visitas AS V  ON M.Codigo = V.Mascota
+	
+	GROUP BY FechaIni.Peso, M.Alias, M.Especie
+	HAVING (FechaIni.Peso - MAX(V.Peso)) != 0
+
+	--Preguntar a leo lo de las fechas consecutivas
 
 
 
