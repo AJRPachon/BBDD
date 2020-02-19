@@ -25,16 +25,35 @@ SELECT * FROM LM_Trenes
 
 GO
 CREATE VIEW NumeroTrenes AS
-SELECT T.ID, L.ID FROM LM_Lineas AS L
+SELECT T.ID AS [Trenes ID], L.ID AS [Lineas ID] FROM LM_Lineas AS L
 INNER JOIN LM_Recorridos AS R  ON L.ID = R.Linea
 INNER JOIN LM_Trenes AS T  ON R.Tren = T.ID
 GROUP BY L.ID, T.ID
-GO
+GO --Primero tengo que ver los trenes que pasan por cada linea
+-- Una vez lo tengo, contar esos trenes, creo una vista para que sea más fácil visualizar
+
+SELECT COUNT(NT.[Trenes ID]) AS [Cantidad de trenes], NT.[Lineas ID] FROM LM_Trenes AS T
+INNER JOIN NumeroTrenes AS NT  ON T.ID = NT.[Trenes ID]
+GROUP BY NT.[Lineas ID]
 
 
 --Ejercicio 3 
 --Indica el número medio de trenes de cada clase que pasan al día por cada estación. 
 
+SELECT * FROM LM_Estaciones
+SELECT * FROM LM_Recorridos
+SELECT * FROM LM_Trenes
+
+GO
+CREATE VIEW [Numero de trenes totales] AS --Para coger el numero de trenes totales que pasan por cada estación
+SELECT COUNT(T.ID) AS [Numero de trenes], E.ID AS [Estaciones ID] FROM LM_Estaciones AS E 
+INNER JOIN LM_Recorridos AS R  ON E.ID = R.estacion
+INNER JOIN LM_Trenes AS T  ON R.Tren = T.ID
+GROUP BY E.ID
+GO
+
+SELECT  NTT.[Estaciones ID], NTT.[Numero de trenes] FROM LM_Estaciones AS E 
+INNER JOIN [Numero de trenes totales] AS NTT ON E.ID = NTT.[Estaciones ID]
 
 
 
