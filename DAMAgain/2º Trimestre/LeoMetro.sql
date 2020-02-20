@@ -40,33 +40,46 @@ GROUP BY NT.[Lineas ID]
 --Ejercicio 3 
 --Indica el número medio de trenes de cada clase que pasan al día por cada estación. 
 
-SELECT * FROM LM_Estaciones
-SELECT * FROM LM_Recorridos
+--Primero: nº de trenes que pasa por cada estación, tipo de trenes y agrupar por dias 
+--Segundo: nº medio de trenes por tipo
+
 SELECT * FROM LM_Trenes
+SELECT * FROM LM_Recorridos
+SELECT * FROM LM_Estaciones
 
-GO
-CREATE VIEW [Numero de trenes totales] AS --Para coger el numero de trenes totales que pasan por cada estación
-SELECT COUNT(T.ID) AS [Numero de trenes], E.ID AS [Estaciones ID] FROM LM_Estaciones AS E 
-INNER JOIN LM_Recorridos AS R  ON E.ID = R.estacion
-INNER JOIN LM_Trenes AS T  ON R.Tren = T.ID
-GROUP BY E.ID
-GO
+SELECT E.ID AS [ID Estacion],E.Denominacion, NumTrenesEstacion.Tipo, AVG(NumTrenesEstacion.[Numero de trenes]) AS [Media trenes por tipo] FROM LM_Estaciones AS E
+INNER JOIN(
 
-SELECT  NTT.[Estaciones ID], NTT.[Numero de trenes] FROM LM_Estaciones AS E 
-INNER JOIN [Numero de trenes totales] AS NTT ON E.ID = NTT.[Estaciones ID]
+	SELECT E.ID, T.Tipo, CONVERT(DATE,R.Momento) AS [Dias] ,COUNT(T.ID) AS [Numero de trenes] FROM LM_Trenes AS T
+	INNER JOIN LM_Recorridos AS R  ON T.ID = R.Tren
+	INNER JOIN LM_Estaciones AS E  ON R.estacion = E.ID
+	GROUP BY E.ID, T.Tipo, CONVERT(DATE,R.Momento) 
+
+) AS NumTrenesEstacion  ON E.ID = NumTrenesEstacion.ID
+GROUP BY NumTrenesEstacion.Tipo, NumTrenesEstacion.ID, E.ID, E.Denominacion
 
 
 
 --Ejercicio 4 
---Calcula el tiempo necesario para recorrer una línea completa, contando con el tiempo estimado de cada itinerario y considerando que cada parada en una estación dura 30 s.
+--Calcula el tiempo necesario para recorrer una línea completa, contando con el tiempo estimado de cada itinerario y considerando
+-- que cada parada en una estación dura 30 s.
 
+SELECT * FROM LM_Lineas
+SELECT * FROM LM_Itinerarios
+SELECT * FROM LM_Estaciones
+
+SELECT Linea,DATEADD(SECOND, SUM((DATEPART(MINUTE,tiempoEstimado) * 60) + DATEPART(SECOND ,TiempoEstimado))+30, CONVERT(TIME , '0:0')) AS [Segundos] FROM LM_Itinerarios
+GROUP BY Linea
+--Con DATEADD, el tercer parametro tiene que ser la fecha a la cual quiero añadir la suma de las otras 2, por lo que empiezo desde 0:0
+--Primero cojo los minutos y luego los segundos restantes, a los que le sumo esos 30 segundos que se lleva el tren parado en una estación
 
 
 
 --Ejercicio 5 
 --Indica el número total de pasajeros que entran (a pie) cada día por cada estación y los que salen del metro en la misma. 
 
-
+SELECT * FROM LM_Estaciones
+SELECT * FROM LM_Pasajeros
 
 
 --Ejercicio 6 
