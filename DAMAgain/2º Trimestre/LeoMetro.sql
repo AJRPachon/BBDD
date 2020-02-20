@@ -41,7 +41,7 @@ GROUP BY NT.[Lineas ID]
 --Indica el número medio de trenes de cada clase que pasan al día por cada estación. 
 
 --Primero: nº de trenes que pasa por cada estación, tipo de trenes y agrupar por dias 
---Segundo: nº medio de trenes por tipo
+--Segundo: Media de los trenes que pasan por cada estacion, cada dia
 
 SELECT * FROM LM_Trenes
 SELECT * FROM LM_Recorridos
@@ -78,8 +78,30 @@ GROUP BY Linea
 --Ejercicio 5 
 --Indica el número total de pasajeros que entran (a pie) cada día por cada estación y los que salen del metro en la misma. 
 
-SELECT * FROM LM_Estaciones
 SELECT * FROM LM_Pasajeros
+SELECT * FROM LM_Tarjetas
+SELECT * FROM LM_Viajes
+SELECT * FROM LM_Estaciones
+
+--Primero: nº total de pasajeros en cada estacion y agrupar por dias 
+--Segundo: pasajeros que salen por la misma estacion que entra en el mismo dia
+
+GO
+CREATE VIEW TotalPersonas AS
+SELECT E.ID AS [ID Estaciones], CONVERT(DATE, V.MomentoEntrada) AS [Momento entrada] , COUNT(P.ID) AS [Numero de personas] FROM LM_Pasajeros AS P
+INNER JOIN LM_Tarjetas AS T  ON P.ID = T.IDPasajero
+INNER JOIN LM_Viajes AS V  ON T.ID = V.IDTarjeta
+INNER JOIN LM_Estaciones AS E  ON V.IDEstacionSalida = E.ID
+GROUP BY E.ID, CONVERT(DATE, V.MomentoEntrada)
+GO
+
+
+SELECT DISTINCT TP.[ID Estaciones], TP.[Momento entrada], TP.[Numero de personas] FROM LM_Estaciones AS E
+INNER JOIN TotalPersonas AS TP  ON E.ID = TP.[ID Estaciones]
+INNER JOIN LM_Viajes AS V  ON E.ID = V.IDEstacionEntrada
+WHERE V.IDEstacionEntrada = V.IDEstacionSalida
+
+--Preguntar a LEO
 
 
 --Ejercicio 6 
