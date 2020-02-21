@@ -71,7 +71,6 @@ SELECT * FROM LM_Estaciones
 SELECT Linea,DATEADD(SECOND, SUM((DATEPART(MINUTE,tiempoEstimado) * 60) + DATEPART(SECOND ,TiempoEstimado) +30), CONVERT(TIME , '0:0')) AS [Segundos] FROM LM_Itinerarios
 GROUP BY Linea
 
-
 --Con DATEADD, el tercer parametro tiene que ser la fecha a la cual quiero añadir la suma de las otras 2, por lo que empiezo desde 0:0
 --Primero cojo los minutos y luego los segundos restantes, a los que le sumo esos 30 segundos que se lleva el tren parado en una estación
 
@@ -109,7 +108,23 @@ INNER JOIN EstacionSalida AS ES  ON EE.[ID Estacion Entrada] = ES.[ID Estacion s
 --Ejercicio 6 
 --Calcula la media de kilómetros al día que hace cada tren. Considera únicamente los días que ha estado en servicio 
 
+SELECT * FROM LM_Itinerarios
+SELECT * FROM LM_Lineas
+SELECT * FROM LM_Recorridos
 
+--Primero: recorrido total de cada tren al dia
+--Segundo: media que realiza al dia y dias que ha estado en servicio
+
+GO
+CREATE VIEW DistanciaTotal AS 
+SELECT R.Tren, COUNT(I.Distancia) AS [Recorrido total], CONVERT(DATE, R.Momento) AS Dia FROM LM_Itinerarios AS I 
+INNER JOIN LM_Lineas AS L  ON I.Linea = L.ID
+INNER JOIN LM_Recorridos AS R  ON L.ID = R.Linea
+GROUP BY R.Tren, CONVERT(DATE, R.Momento)
+GO
+
+SELECT DT.Tren, AVG(DT.[Recorrido total]) AS Media FROM DistanciaTotal AS DT
+GROUP BY DT.Tren
 
 
 --Ejercicio 7 
@@ -121,8 +136,9 @@ INNER JOIN EstacionSalida AS ES  ON EE.[ID Estacion Entrada] = ES.[ID Estacion s
 --Ejercicio 8 
 --Calcula el dinero gastado por cada usuario en el mes de febrero de 2017. El precio de un viaje es el de la zona más cara que incluya. Incluye a los que no han viajado.
 
-
-
+SELECT * FROM LM_Viajes
+SELECT * FROM LM_Tarjetas
+SELECT * FROM LM_Recargas
 
 --Ejercicio 9 
 --Calcula el tiempo medio diario que cada pasajero pasa en el sistema de metro y el número de veces que accede al mismo.
