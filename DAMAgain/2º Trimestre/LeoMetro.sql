@@ -68,8 +68,10 @@ SELECT * FROM LM_Lineas
 SELECT * FROM LM_Itinerarios
 SELECT * FROM LM_Estaciones
 
-SELECT Linea,DATEADD(SECOND, SUM((DATEPART(MINUTE,tiempoEstimado) * 60) + DATEPART(SECOND ,TiempoEstimado))+30, CONVERT(TIME , '0:0')) AS [Segundos] FROM LM_Itinerarios
+SELECT Linea,DATEADD(SECOND, SUM((DATEPART(MINUTE,tiempoEstimado) * 60) + DATEPART(SECOND ,TiempoEstimado) +30), CONVERT(TIME , '0:0')) AS [Segundos] FROM LM_Itinerarios
 GROUP BY Linea
+
+
 --Con DATEADD, el tercer parametro tiene que ser la fecha a la cual quiero añadir la suma de las otras 2, por lo que empiezo desde 0:0
 --Primero cojo los minutos y luego los segundos restantes, a los que le sumo esos 30 segundos que se lleva el tren parado en una estación
 
@@ -87,21 +89,21 @@ SELECT * FROM LM_Estaciones
 --Segundo: pasajeros que salen por la misma estacion que entra en el mismo dia
 
 GO
-CREATE VIEW TotalPersonas AS
-SELECT E.ID AS [ID Estaciones], CONVERT(DATE, V.MomentoEntrada) AS [Momento entrada] , COUNT(P.ID) AS [Numero de personas] FROM LM_Pasajeros AS P
-INNER JOIN LM_Tarjetas AS T  ON P.ID = T.IDPasajero
+CREATE VIEW EstacionEntrada AS
+SELECT V.IDEstacionEntrada AS [ID Estacion Entrada], CONVERT(DATE, V.MomentoEntrada) AS [Momento entrada] , COUNT(T.IDPasajero) AS [Numero de personas] FROM LM_Tarjetas AS T
 INNER JOIN LM_Viajes AS V  ON T.ID = V.IDTarjeta
-INNER JOIN LM_Estaciones AS E  ON V.IDEstacionSalida = E.ID
-GROUP BY E.ID, CONVERT(DATE, V.MomentoEntrada)
+GROUP BY V.IDEstacionEntrada, CONVERT(DATE, V.MomentoEntrada)
 GO
 
+CREATE VIEW EstacionSalida AS
+SELECT V.IDEstacionSalida AS [ID Estacion salida], CONVERT(DATE, V.MomentoSalida) AS [Momento salida] , COUNT(T.IDPasajero) AS [Numero de personas] FROM LM_Tarjetas AS T
+INNER JOIN LM_Viajes AS V  ON T.ID = V.IDTarjeta
+GROUP BY V.IDEstacionSalida, CONVERT(DATE, V.MomentoSalida)
+GO
 
-SELECT DISTINCT TP.[ID Estaciones], TP.[Momento entrada], TP.[Numero de personas] FROM LM_Estaciones AS E
-INNER JOIN TotalPersonas AS TP  ON E.ID = TP.[ID Estaciones]
-INNER JOIN LM_Viajes AS V  ON E.ID = V.IDEstacionEntrada
-WHERE V.IDEstacionEntrada = V.IDEstacionSalida
+SELECT EE.[ID Estacion Entrada] AS [ID Estacion], EE.[Momento entrada] AS [Momento], EE.[Numero de personas] AS [NumPerEntran], ES.[Numero de personas] AS [NumPerSalen] FROM EstacionEntrada AS EE
+INNER JOIN EstacionSalida AS ES  ON EE.[ID Estacion Entrada] = ES.[ID Estacion salida] AND EE.[Momento entrada] = ES.[Momento salida]
 
---Preguntar a LEO
 
 
 --Ejercicio 6 
@@ -124,3 +126,8 @@ WHERE V.IDEstacionEntrada = V.IDEstacionSalida
 
 --Ejercicio 9 
 --Calcula el tiempo medio diario que cada pasajero pasa en el sistema de metro y el número de veces que accede al mismo.
+
+
+
+
+
