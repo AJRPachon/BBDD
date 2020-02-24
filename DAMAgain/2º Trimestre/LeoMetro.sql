@@ -138,7 +138,49 @@ GROUP BY DT.Tren
 
 SELECT * FROM LM_Viajes
 SELECT * FROM LM_Tarjetas
-SELECT * FROM LM_Recargas
+SELECT * FROM LM_Pasajeros
+
+
+SELECT P.ID, P.Nombre, P.Apellidos, SUM(V.Importe_Viaje) AS [Total gastado] FROM LM_Viajes AS V
+INNER JOIN LM_Tarjetas AS T  ON V.IDTarjeta = T.ID
+LEFT JOIN LM_Pasajeros AS P  ON T.IDPasajero = P.ID
+WHERE YEAR(V.MomentoEntrada) = 2017 AND MONTH(V.MomentoEntrada) = 2
+GROUP BY P.ID, P.Nombre, P.Apellidos
+
+--CON FUNCION INLINE
+GO
+BEGIN TRANSACTION
+GO
+CREATE FUNCTION MomentoViajeAnio (@Anio AS SmallInt) RETURNS TABLE AS
+RETURN
+(SELECT P.ID, P.Nombre, P.Apellidos, SUM(V.Importe_Viaje) AS [Total gastado] FROM LM_Viajes AS V
+INNER JOIN LM_Tarjetas AS T  ON V.IDTarjeta = T.ID
+LEFT JOIN LM_Pasajeros AS P  ON T.IDPasajero = P.ID
+WHERE YEAR(V.MomentoEntrada) = @Anio AND MONTH(V.MomentoEntrada) = 2
+GROUP BY P.ID, P.Nombre, P.Apellidos)
+GO
+
+SELECT P.ID, P.Nombre, P.Apellidos, SUM(V.Importe_Viaje) AS [Total gastado] FROM LM_Viajes AS V
+INNER JOIN LM_Tarjetas AS T  ON V.IDTarjeta = T.ID
+LEFT JOIN LM_Pasajeros AS P  ON T.IDPasajero = P.ID
+WHERE MomentoViajeAnio(2017) AND MONTH(V.MomentoEntrada) = 2
+GROUP BY P.ID, P.Nombre, P.Apellidos
+GO
+ROLLBACK
+
+
+--CREATE Function FNVentasAnuales (@Anno AS SmallInt) RETURNS TABLE AS
+--RETURN
+--(SELECT P.ProductID, P.ProductName, SUM(ISNULL(OD.Quantity,0)) AS VentasAnuales FROM Products AS P
+--	LEFT JOIN [Order Details] AS OD ON P.ProductID = OD.ProductID
+--	LEFT JOIN Orders AS O ON OD.OrderID = O.OrderID
+--	Where Year (O.OrderDate) = @Anno OR O.OrderDate IS NULL
+--	Group By P.ProductID, P.ProductName)
+--GO
+----Reescribimos de nuevo la consulta 
+--SELECT V97.ProductName, ISNULL(V96.VentasAnuales, 0) as Ventas96, V97.VentasAnuales As Ventas97, V97.VentasAnuales - IsNull(V96.VentasAnuales,0) AS Incremento,  
+--	CAST (((V97.VentasAnuales - V96.VentasAnuales)*100)/Nullif (V96.VentasAnuales,0) AS Decimal(5,1)) AS Porcentaje 
+--	FROM FNVentasAnuales(1996) AS V96 RIGHT JOIN FNVentasAnuales(1997) AS V97 ON V96.ProductID = V97.ProductID
 
 --Ejercicio 9 
 --Calcula el tiempo medio diario que cada pasajero pasa en el sistema de metro y el número de veces que accede al mismo.
