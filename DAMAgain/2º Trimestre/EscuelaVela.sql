@@ -68,18 +68,23 @@ GROUP BY M.licencia_federativa, MI.nombre, MI.apellidos, C.denominacion
 
 --Ver
 
-
 --Ejercicio 4
---Número de horas de cursos acumuladas por cada miembro que no haya disputado una regata en la clase 470 en los dos últimos años (2013 y 2014). Se contarán únicamente las regatas que se hayan disputado en un campo de regatas situado en longitud Oeste (W). Se sabe que la longitud es W porque el número es negativo.
+-- Número de horas de cursos acumuladas por cada miembro que no haya disputado una regata en la clase 470 en los dos últimos años (2013 y 2014). 
+-- Se contarán únicamente las regatas que se hayan disputado en un campo de regatas situado en longitud Oeste (W). 
+-- Se sabe que la longitud es W porque el número es negativo.
 
+SELECT * FROM EV_Monitores
+SELECT * FROM EV_Regatas
+SELECT * FROM EV_Campo_Regatas
 
 
 --Ejercicio 5
---El comité de competiciones está preocupado por el bajo rendimiento de los regatistas en las clases Tornado y 49er, así que decide organizar unos cursos para repasar
---las técnicas más importantes. Los cursos se titulan "Perfeccionamiento Tornado” y "Perfeccionamiento 49er”, ambos de 120 horas de duración. 
---Comezarán los días 21 de marzo y 10 de abril, respectivamente. El primero será impartido por Salud Itos y el segundo por Fernando Minguero.
---Escribe un INSERT-SELECT para matricular en estos cursos a todos los miembros que hayan participado en regatas en alguna de estas clases desde el 1 de Abril de 2014, 
---cuidando de que los propios monitores no pueden ser también alumnos.
+-- El comité de competiciones está preocupado por el bajo rendimiento de los regatistas en las clases Tornado y 49er, así que decide organizar
+-- unos cursos para repasar las técnicas más importantes. Los cursos se titulan "Perfeccionamiento Tornado” y "Perfeccionamiento 49er”, 
+-- ambos de 120 horas de duración. Comezarán los días 21 de marzo y 10 de abril, respectivamente. 
+-- El primero será impartido por Salud Itos y el segundo por Fernando Minguero.
+-- Escribe un INSERT-SELECT para matricular en estos cursos a todos los miembros que hayan participado en regatas en alguna de estas clases 
+-- desde el 1 de Abril de 2014, cuidando de que los propios monitores no pueden ser también alumnos.
 
 
 
