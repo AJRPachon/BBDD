@@ -67,6 +67,30 @@ SELECT * FROM EV_Miembros_Cursos
 SELECT * FROM EV_Cursos
 
 
+----------------------------------------------------------------------------------------
+GO
+CREATE VIEW VTrabajoMonitores AS
+SELECT MI.licencia_federativa, MI.nombre, MI.apellidos, SC.[Nº Cursos], SC.[Nº horas], SC.[Nº Personas] FROM(
+
+	SELECT MO.licencia_federativa, COUNT(DISTINCT C.codigo_curso) AS [Nº Cursos], COUNT(MI.licencia_federativa) AS [Nº Personas], NH.[Nº horas] FROM EV_Miembros AS MI
+	INNER JOIN EV_Miembros_Cursos AS MC	ON MI.licencia_federativa = MC.licencia_federativa
+	INNER JOIN EV_Cursos AS C ON MC.codigo_curso = C.codigo_curso
+	RIGHT JOIN EV_Monitores AS MO ON C.licencia = MO.licencia_federativa
+	INNER JOIN (
+
+		SELECT MO.licencia_federativa, SUM(C.duracion) AS [Nº horas] FROM EV_Monitores AS MO --Primero obtengo 
+		LEFT JOIN EV_Cursos AS C  ON MO.licencia_federativa = C.licencia
+		GROUP BY MO.licencia_federativa
+	
+		) AS NH  ON MO.licencia_federativa = NH.licencia_federativa
+		GROUP BY MO.licencia_federativa, NH.[Nº horas]
+
+	) AS SC
+
+INNER JOIN EV_Miembros AS MI ON MI.licencia_federativa = SC.licencia_federativa
+ORDER BY MI.licencia_federativa
+GO
+
 
 
 
@@ -75,9 +99,39 @@ SELECT * FROM EV_Cursos
 -- Se contarán únicamente las regatas que se hayan disputado en un campo de regatas situado en longitud Oeste (W). 
 -- Se sabe que la longitud es W porque el número es negativo.
 
-SELECT * FROM EV_Monitores
+SELECT * FROM EV_Miembros
+SELECT * FROM EV_Miembros_Cursos
+SELECT * FROM EV_Cursos
+SELECT * FROM EV_Miembros_Barcos_Regatas
 SELECT * FROM EV_Regatas
 SELECT * FROM EV_Campo_Regatas
+SELECT * FROM EV_Barcos
+
+SELECT DISTINCT MI.licencia_federativa, COUNT(C.duracion) AS [Numero de horas] FROM EV_Miembros AS MI
+INNER JOIN EV_Miembros_Cursos AS MC ON MI.licencia_federativa = MC.licencia_federativa
+INNER JOIN EV_Cursos AS C ON MC.codigo_curso = C.codigo_curso
+INNER JOIN EV_Miembros_Barcos_Regatas AS MBR ON MI.licencia_federativa = MBR.licencia_miembro
+INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
+INNER JOIN EV_Regatas AS R ON MBR.f_inicio_regata = R.f_inicio
+INNER JOIN EV_Campo_Regatas AS CR ON R.nombre_campo = CR.nombre_campo
+WHERE MI.licencia_federativa NOT IN
+	(
+	SELECT DISTINCT MI.licencia_federativa FROM EV_Miembros AS MI
+	INNER JOIN EV_Miembros_Cursos AS MC ON MI.licencia_federativa = MC.licencia_federativa
+	INNER JOIN EV_Cursos AS C ON MC.codigo_curso = C.codigo_curso
+	INNER JOIN EV_Miembros_Barcos_Regatas AS MBR ON MI.licencia_federativa = MBR.licencia_miembro
+	INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
+	INNER JOIN EV_Regatas AS R ON MBR.f_inicio_regata = R.f_inicio
+	INNER JOIN EV_Campo_Regatas AS CR ON R.nombre_campo = CR.nombre_campo
+	WHERE B.nombre_clase = '470' AND CR.longitud_llegada > 0
+	) 
+
+GROUP BY MI.licencia_federativa, MBR.f_inicio_regata, R.f_inicio
+HAVING YEAR(MBR.f_inicio_regata) = 2013 OR YEAR(MBR.f_inicio_regata) = 2014
+
+
+
+
 
 
 --Ejercicio 5
