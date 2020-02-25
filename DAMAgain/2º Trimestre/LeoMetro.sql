@@ -160,10 +160,10 @@ WHERE YEAR(V.MomentoEntrada) = @Anio AND MONTH(V.MomentoEntrada) = @Mes
 GROUP BY P.ID, P.Nombre, P.Apellidos)
 GO
 
-declare @Anio SmallInt set @Anio = 2017
+declare @Anio SmallInt = 2017
 declare @Mes SmallInt set @Mes = 2
 
-SELECT * FROM [MomentoViaje](@Anio,@Mes)
+SELECT * FROM [MomentoViaje](2017,@Mes)
 
 ROLLBACK
 

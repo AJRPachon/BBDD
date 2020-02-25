@@ -40,7 +40,11 @@ INNER JOIN Orders AS O  ON C.CustomerID = O.CustomerID
 
 --4.- Inserta un nuevo vendedor llamado Michael Trump. Asígnale los territorios de Louisville, Phoenix, Santa Cruz y Atlanta.
 
+SELECT * FROM Employees
 
+BEGIN TRANSACTION
+
+INSERT INTO Employees (EmployeeID, LastName, FirstName, Title, TitleOfCourtesy, BirthDate, HireDate, Address, City, Region, PostalCode, Country,HomePhone, Extension, Photo, Notes, ReportsTo, PhotoPath)
 
 
 --5.- Haz que las ventas del año 97 de Robert King que haya hecho a clientes de los estados de California y Texas se le asignen al nuevo empleado.
