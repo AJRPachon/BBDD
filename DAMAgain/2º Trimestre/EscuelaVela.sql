@@ -66,8 +66,6 @@ SELECT * FROM EV_Miembros
 SELECT * FROM EV_Miembros_Cursos
 SELECT * FROM EV_Cursos
 
-
-----------------------------------------------------------------------------------------
 GO
 CREATE VIEW VTrabajoMonitores AS
 SELECT MI.licencia_federativa, MI.nombre, MI.apellidos, SC.[Nº Cursos], SC.[Nº horas], SC.[Nº Personas] FROM(
@@ -90,7 +88,6 @@ SELECT MI.licencia_federativa, MI.nombre, MI.apellidos, SC.[Nº Cursos], SC.[Nº h
 INNER JOIN EV_Miembros AS MI ON MI.licencia_federativa = SC.licencia_federativa
 ORDER BY MI.licencia_federativa
 GO
-
 
 
 
@@ -117,14 +114,10 @@ WHERE MI.licencia_federativa NOT IN
 	INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
 	INNER JOIN EV_Regatas AS R ON MBR.f_inicio_regata = R.f_inicio
 	INNER JOIN EV_Campo_Regatas AS CR ON R.nombre_campo = CR.nombre_campo
-	WHERE B.nombre_clase = '470' AND CR.longitud_llegada < 0 AND (YEAR(MBR.f_inicio_regata) = 2013 OR YEAR(MBR.f_inicio_regata) = 2014)
+	WHERE B.nombre_clase = '470' AND CR.longitud_llegada < 0 AND YEAR(MBR.f_inicio_regata) IN (2013 ,2014)
 	) 
 
 GROUP BY MI.licencia_federativa
-
-
-
-
 
 
 
@@ -135,6 +128,46 @@ GROUP BY MI.licencia_federativa
 -- El primero será impartido por Salud Itos y el segundo por Fernando Minguero.
 -- Escribe un INSERT-SELECT para matricular en estos cursos a todos los miembros que hayan participado en regatas en alguna de estas clases 
 -- desde el 1 de Abril de 2014, cuidando de que los propios monitores no pueden ser también alumnos.
+
+BEGIN TRANSACTION 
+GO --FUNCIÓN PARA SABER EL NUMERO DE LICENCIA DE CUALQUIER MONITOR
+CREATE FUNCTION SaberLicencia (@nombre AS varchar(20), @apellido AS varchar(30) ) RETURNS TABLE AS
+RETURN
+SELECT MO.licencia_federativa FROM EV_Miembros AS M
+INNER JOIN EV_Monitores AS MO  ON M.licencia_federativa = MO.licencia_federativa
+WHERE M.nombre = @nombre AND M.apellidos = @apellido
+
+GO
+ROLLBACK
+--COMMIT
+
+SELECT * FROM SaberLicencia ('Salud', 'Itos')
+SELECT * FROM SaberLicencia ('Fernando','Minguero')
+
+
+BEGIN TRANSACTION
+SELECT * FROM EV_Cursos
+
+INSERT INTO EV_Cursos --PARA INSERTAR LOS DOS NUEVOS CURSOS
+VALUES  (13, 'Perfect Tornado', '2020-03-21', 120, (SELECT * FROM SaberLicencia ('Salud', 'Itos'))),
+		(14, 'Perfect 49er', '2020-04-10', 120, (SELECT * FROM SaberLicencia ('Fernando','Minguero')))
+
+ROLLBACK
+--COMMIT
+
+-- Escribe un INSERT-SELECT para matricular en estos cursos a todos los miembros que hayan participado en regatas en alguna de estas clases 
+-- desde el 1 de Abril de 2014, cuidando de que los propios monitores no pueden ser también alumnos.
+GO
+CREATE VIEW LicenciaClases AS
+SELECT DISTINCT M.licencia_federativa FROM EV_Miembros AS M
+INNER JOIN EV_Miembros_Barcos_Regatas AS MBR  ON M.licencia_federativa = MBR.licencia_miembro
+INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
+WHERE (B.nombre_clase = 'Tornado' OR B.nombre_clase = '49er') AND MBR.f_inicio_regata > '2014-04-01'
+GO
+
+
+
+
 
 
 
