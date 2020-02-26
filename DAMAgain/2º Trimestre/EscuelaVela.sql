@@ -107,27 +107,21 @@ SELECT * FROM EV_Regatas
 SELECT * FROM EV_Campo_Regatas
 SELECT * FROM EV_Barcos
 
-SELECT DISTINCT MI.licencia_federativa, COUNT(C.duracion) AS [Numero de horas] FROM EV_Miembros AS MI
+SELECT DISTINCT MI.licencia_federativa, SUM(C.duracion) AS [Numero de horas] FROM EV_Miembros AS MI
 INNER JOIN EV_Miembros_Cursos AS MC ON MI.licencia_federativa = MC.licencia_federativa
 INNER JOIN EV_Cursos AS C ON MC.codigo_curso = C.codigo_curso
-INNER JOIN EV_Miembros_Barcos_Regatas AS MBR ON MI.licencia_federativa = MBR.licencia_miembro
-INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
-INNER JOIN EV_Regatas AS R ON MBR.f_inicio_regata = R.f_inicio
-INNER JOIN EV_Campo_Regatas AS CR ON R.nombre_campo = CR.nombre_campo
 WHERE MI.licencia_federativa NOT IN
 	(
 	SELECT DISTINCT MI.licencia_federativa FROM EV_Miembros AS MI
-	INNER JOIN EV_Miembros_Cursos AS MC ON MI.licencia_federativa = MC.licencia_federativa
-	INNER JOIN EV_Cursos AS C ON MC.codigo_curso = C.codigo_curso
 	INNER JOIN EV_Miembros_Barcos_Regatas AS MBR ON MI.licencia_federativa = MBR.licencia_miembro
 	INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
 	INNER JOIN EV_Regatas AS R ON MBR.f_inicio_regata = R.f_inicio
 	INNER JOIN EV_Campo_Regatas AS CR ON R.nombre_campo = CR.nombre_campo
-	WHERE B.nombre_clase = '470' AND CR.longitud_llegada > 0
+	WHERE B.nombre_clase = '470' AND CR.longitud_llegada < 0 AND (YEAR(MBR.f_inicio_regata) = 2013 OR YEAR(MBR.f_inicio_regata) = 2014)
 	) 
 
-GROUP BY MI.licencia_federativa, MBR.f_inicio_regata, R.f_inicio
-HAVING YEAR(MBR.f_inicio_regata) = 2013 OR YEAR(MBR.f_inicio_regata) = 2014
+GROUP BY MI.licencia_federativa
+
 
 
 
