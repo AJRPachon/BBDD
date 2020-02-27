@@ -136,36 +136,35 @@ RETURN
 SELECT MO.licencia_federativa FROM EV_Miembros AS M
 INNER JOIN EV_Monitores AS MO  ON M.licencia_federativa = MO.licencia_federativa
 WHERE M.nombre = @nombre AND M.apellidos = @apellido
-
 GO
-ROLLBACK
---COMMIT
-
-SELECT * FROM SaberLicencia ('Salud', 'Itos')
-SELECT * FROM SaberLicencia ('Fernando','Minguero')
 
 
-BEGIN TRANSACTION
 SELECT * FROM EV_Cursos
 
 INSERT INTO EV_Cursos --PARA INSERTAR LOS DOS NUEVOS CURSOS
 VALUES  (13, 'Perfect Tornado', '2020-03-21', 120, (SELECT * FROM SaberLicencia ('Salud', 'Itos'))),
 		(14, 'Perfect 49er', '2020-04-10', 120, (SELECT * FROM SaberLicencia ('Fernando','Minguero')))
 
-ROLLBACK
+ 
 --COMMIT
 
 -- Escribe un INSERT-SELECT para matricular en estos cursos a todos los miembros que hayan participado en regatas en alguna de estas clases 
 -- desde el 1 de Abril de 2014, cuidando de que los propios monitores no pueden ser también alumnos.
-GO
-CREATE VIEW LicenciaClases AS
-SELECT DISTINCT M.licencia_federativa FROM EV_Miembros AS M
-INNER JOIN EV_Miembros_Barcos_Regatas AS MBR  ON M.licencia_federativa = MBR.licencia_miembro
+
+SELECT * FROM EV_Miembros_Cursos
+
+SELECT * FROM EV_Clases
+
+INSERT INTO EV_Miembros_Cursos
+SELECT DISTINCT MBR.licencia_miembro, 13 FROM EV_Miembros_Barcos_Regatas AS MBR 
 INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
-WHERE (B.nombre_clase = 'Tornado' OR B.nombre_clase = '49er') AND MBR.f_inicio_regata > '2014-04-01'
-GO
+WHERE B.nombre_clase = 'Tornado' AND MBR.f_inicio_regata >= '2014-04-01' AND MBR.licencia_miembro != (SELECT * FROM SaberLicencia('Salud','Itos'))
 
 
+INSERT INTO EV_Miembros_Cursos
+SELECT DISTINCT MBR.licencia_miembro, 14 FROM EV_Miembros_Barcos_Regatas AS MBR 
+INNER JOIN EV_Barcos AS B  ON MBR.n_vela = B.n_vela
+WHERE B.nombre_clase = '49er' AND MBR.f_inicio_regata >= '2014-04-01' AND MBR.licencia_miembro != (SELECT * FROM SaberLicencia('Fernando','Minguero'))
 
 
 
