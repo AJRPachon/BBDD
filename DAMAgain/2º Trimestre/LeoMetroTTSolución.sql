@@ -15,6 +15,9 @@
 --, nombre, apellidos, número de identificaciones positivas, número de identificaciones positivas buenas y valor medio de la fiabilidad de las identificaciones.
 
 
+USE LeoMetro
+GO
+
 SELECT * FROM Detecciones
 
 
@@ -25,7 +28,7 @@ CREATE TABLE #IdentificacionesFiables (
 	Apellidos VARCHAR (30),
 	IdentificacionesPositivas INT,
 	IdentificacionesBuenas INT,
-	AVG_Fiabilidad INT,
+	AVG_Fiabilidad FLOAT, --Lo había puesto como INT primeramente, pero como da números decimales, lo he cambiado a FLOAT
 
 )
 
@@ -36,7 +39,8 @@ INSERT #IdentificacionesFiables
 
 		--Contamos todas las identificaciones y hacemos la media de fiabilidad de ellas, agrupando por ID del pasajero
 		--Las identificaciones positivas nos referimos a las que sean mayor de 0.7
-		SELECT T.IDPasajero, COUNT(DISTINCT D.Fiabilidad) AS [Identificaciones Positivas], AVG(DISTINCT D.Fiabilidad) AS [Fiabilidad Media] FROM LM_Viajes AS V
+		--Uso ROUND para que no salgan tantos número decimales
+		SELECT T.IDPasajero, COUNT(DISTINCT D.Fiabilidad) AS [Identificaciones Positivas], ROUND(AVG(DISTINCT D.Fiabilidad),4) AS [Fiabilidad Media] FROM LM_Viajes AS V
 		INNER JOIN LM_Tarjetas AS T  ON V.IDTarjeta = T.ID
 		INNER JOIN Detecciones AS D  ON D.Momento BETWEEN V.MomentoEntrada AND V.MomentoSalida
 		GROUP BY T.IDPasajero
@@ -59,7 +63,9 @@ SELECT * FROM #IdentificacionesFiables
 
 SELECT * FROM Sospechosos
 
+-- Para pasar el archivo a XML he encontrado esta sintaxis.
 
+SELECT * FROM Sospechosos FOR XML AUTO, ELEMENTS, XMLDATA
 
 
 
