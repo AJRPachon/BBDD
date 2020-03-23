@@ -1,3 +1,15 @@
+--Las fuerzas de seguridad están intentando localizar y detener a un peligroso terrorista neonazi que prepara un atentado contra un centro social que ofrece comida
+--y alojamiento a personas con pocos recursos.
+
+--Para ello se ha instalado un sistema de videovigilancia y reconocimiento automático de imágenes en el metro. El terrorista ha sido detectado por este sistema en varias ocasiones. 
+
+--La Policía nos envía una tabla en la que figura el momento en el que fue detectado el terrorista por alguna de las cámaras y el grado de fiabilidad de esa detección.
+
+--El grado de fiabilidad es un número real entre 0.5 y 1, y representa la probabilidad estimada de que la detección sea correcta.
+
+--Para ser buena, una detección tiene que tener un valor superior a 0.85. Si está entre 0.85 y 0.70 se considera media, y si es inferior a 0.7 es una detección mala.
+
+--Se ha añadido un ID a la tabla para facilitar el trabajo y para cumplir la primera restricción inherente al modelo relacional, que para eso somos gente seria y profesional.
 
 --Nos piden que identifiquemos quiénes eran los usuarios del metro que estaban dentro del sistema en esos momentos que nos dan y generemos una tabla en la que almacenaremos los IDs
 --, nombre, apellidos, número de identificaciones positivas, número de identificaciones positivas buenas y valor medio de la fiabilidad de las identificaciones.
